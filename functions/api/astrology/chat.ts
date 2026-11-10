@@ -1,3 +1,4 @@
+﻿import { processAstrologyContext, type BirthDetails } from '../../../src/astrology/engine';
 
 interface Env {
   GEMINI_API_KEY: string;
@@ -12,14 +13,14 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   try {
     if (!env.GEMINI_API_KEY) {
       return Response.json(
-        { error: 'Gemini API Key Cloudflare में उपलब्ध नहीं है।' },
+        { error: 'Gemini API key is not configured in Cloudflare.' },
         { status: 503 }
       );
     }
 
     const body = await request.json() as {
       messages?: ChatMessage[];
-      birthDetails?: Record<string, unknown>;
+      birthDetails?: Partial<BirthDetails>;
       language?: 'hi' | 'en';
     };
 
@@ -27,26 +28,33 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return Response.json(
-        { error: 'Messages array is required' },
+        { error: 'Messages array is required.' },
         { status: 400 }
       );
     }
+
+    const astrologyContext = processAstrologyContext(birthDetails);
 
     const systemInstruction = `
 You are the dedicated Vedic Astrology and Puja Consultant for Kashi Anushthan under Acharya Yogesh Upadhyay Ji in Varanasi.
 
 Follow Vedic Sidereal Nirayana Jyotish and Lahiri Ayanamsha.
 Never invent exact planetary degrees, Lagna, Nakshatra Pada or Vimshottari Dasha timings.
+The supplied astrology engine does not contain an exact planetary ephemeris.
 Explain that precise chart calculations are verified by Acharya Yogesh Upadhyay Ji using the authentic handwritten Kashi Panchang.
 Never frighten users or guarantee miracles.
 Give compassionate, responsible spiritual guidance.
 Recommend relevant pujas only when appropriate.
 Bookings: WhatsApp +91 8210803558, Email vkbxr258@gmail.com.
-Starting puja price: ₹501. Final dakshina and samagri depend on ritual scale.
+Starting puja price: Rs. 501. Final dakshina and samagri depend on ritual scale.
 Respond in ${language === 'en' ? 'English' : 'Hindi in Devanagari script'}.
 Maintain a respectful and devotional tone.
 
-Birth details: ${JSON.stringify(birthDetails || {})}
+Astrology calculation context:
+${JSON.stringify(astrologyContext)}
+
+Birth details:
+${JSON.stringify(birthDetails || {})}
 `;
 
     const contents = messages.map((message) => ({
@@ -82,7 +90,7 @@ Birth details: ${JSON.stringify(birthDetails || {})}
 
     if (!response.ok) {
       return Response.json(
-        { error: data.error?.message || 'Gemini API से उत्तर नहीं मिला।' },
+        { error: data.error?.message || 'Gemini API request failed.' },
         { status: response.status }
       );
     }
@@ -94,7 +102,7 @@ Birth details: ${JSON.stringify(birthDetails || {})}
 
     if (!reply) {
       return Response.json(
-        { error: 'AI अभी उत्तर नहीं दे पाया। कृपया दोबारा प्रयास करें।' },
+        { error: 'AI could not generate a response. Please try again.' },
         { status: 502 }
       );
     }
@@ -105,7 +113,7 @@ Birth details: ${JSON.stringify(birthDetails || {})}
       {
         error: error instanceof Error
           ? error.message
-          : 'सर्वर में त्रुटि हुई।',
+          : 'An internal server error occurred.',
       },
       { status: 500 }
     );
