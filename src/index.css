@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-saffron: #D96800;
+    --color-saffron-dark: #A43F00;
+    --color-maroon: #5E141D;
+    --color-maroon-dark: #3F0B12;
+    --color-gold: #C69214;
+    --color-cream: #FFFDF9;
+    --color-cream-card: #FAF6ED;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'Noto Serif Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #FFFDF9;
+    color: #2D1A12;
+  }
+
+  h1, h2, h3, .font-vedic {
+    font-family: 'Noto Serif Devanagari', 'Cinzel', serif;
+  }
+}
+
+/* Sacred Vedic motif backgrounds & ornamentation */
+.bg-sacred-pattern {
+  background-color: #FFFDF9;
+  background-image: radial-gradient(rgba(217, 104, 0, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.vedic-gold-border {
+  border-color: rgba(198, 146, 20, 0.28);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #A43F00 0%, #D96800 50%, #C69214 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
